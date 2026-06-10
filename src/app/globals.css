@@ -1,0 +1,68 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #0a0818;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-karla), sans-serif;
+  color: #f3f2f8;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes floatY {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+/* Link hover state (the design's style-hover; not expressible inline) */
+.linkRow {
+  transition: all 0.25s ease;
+}
+
+.linkRow:hover {
+  background: rgba(8, 190, 216, 0.15) !important;
+  border-color: rgba(8, 190, 216, 0.75) !important;
+  box-shadow: 0 0 26px rgba(8, 190, 216, 0.28);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

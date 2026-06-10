@@ -1,0 +1,66 @@
+import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { PERSON_NAME, PERSON_ROLE } from "@/data/site";
+
+export const runtime = "nodejs";
+export const alt = `${PERSON_NAME} — ${PERSON_ROLE}`;
+export const size = { width: 1200, height: 630 };
+export const contentType = "image/png";
+
+export default async function OpengraphImage() {
+  const avatar = await readFile(join(process.cwd(), "public", "angela.jpg"));
+  const avatarSrc = `data:image/jpeg;base64,${avatar.toString("base64")}`;
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background:
+            "linear-gradient(180deg, #0A0818 0%, #1A0F38 42%, #2A1150 68%, #0E1E36 100%)",
+          color: "#F3F2F8",
+          fontFamily: "sans-serif",
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={avatarSrc}
+          width={224}
+          height={224}
+          alt={PERSON_NAME}
+          style={{
+            borderRadius: "50%",
+            objectFit: "cover",
+            border: "6px solid #08BED8",
+            boxShadow: "0 0 60px rgba(8,190,216,0.45)",
+          }}
+        />
+        <div style={{ fontSize: 76, fontWeight: 800, marginTop: 44, letterSpacing: "-0.02em" }}>
+          {PERSON_NAME}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            marginTop: 26,
+            padding: "14px 32px",
+            borderRadius: 999,
+            background: "#08BED8",
+            color: "#04222A",
+            fontSize: 30,
+            fontWeight: 700,
+            letterSpacing: "0.04em",
+          }}
+        >
+          {PERSON_ROLE}
+        </div>
+      </div>
+    ),
+    { ...size },
+  );
+}
