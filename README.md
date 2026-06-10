@@ -47,6 +47,29 @@ The project is a zero-config Next.js app — Vercel auto-detects it.
 
 No environment variables are required to build or run.
 
+## SEO & discoverability
+
+- **Metadata** — title, ~150-char description (per-language, SERP-sized), canonical,
+  keywords, robots (`max-image-preview:large`, `max-snippet:-1`), Open Graph
+  (`profile`, locale + alternates) and Twitter `summary_large_image`.
+- **Generated OG image** — `opengraph-image.tsx` renders a branded 1200×630 card
+  (also used as the Twitter image).
+- **Structured data** — JSON-LD `ProfilePage` → `Person` (jobTitle, image,
+  `sameAs` = Angela's own profiles, `worksFor` = Accentio Studios org,
+  `knowsAbout`/`knowsLanguage`).
+- **Icons** — square PNG set (32 / 180 apple / 192 / 512 / 512 maskable) in
+  `public/`, generated from the avatar.
+- **Routes** — `robots.txt` (explicitly allows major search + LLM crawlers:
+  GPTBot, ClaudeBot, PerplexityBot, Google-Extended, Bytespider, …),
+  `sitemap.xml`, `manifest.webmanifest`, and `public/llms.txt`
+  ([llmstxt.org](https://llmstxt.org)) for LLM ingestion.
+- **A11y** — semantic `<main>/<header>/<nav>`, single `<h1>`, decorative layer
+  `aria-hidden`, visible `:focus-visible` ring, labelled language toggle,
+  `prefers-reduced-motion`.
+
+Set `NEXT_PUBLIC_SITE_URL` (see `.env.example`) so canonical / OG / sitemap /
+JSON-LD URLs use your real domain instead of the `*.vercel.app` placeholder.
+
 ## Project structure
 
 ```

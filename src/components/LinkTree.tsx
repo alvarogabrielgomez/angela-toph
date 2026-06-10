@@ -3,7 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/icons";
-import { bios, links, LANGS, type Lang } from "@/data/content";
+import { bios, links, LANGS, LANG_NAMES, type Lang } from "@/data/content";
 import {
   subscribe,
   getSnapshot,
@@ -42,6 +42,7 @@ function LangSwitcher({
             type="button"
             onClick={() => onChange(o)}
             aria-pressed={on}
+            aria-label={LANG_NAMES[o]}
             style={{
               cursor: "pointer",
               border: "none",

@@ -25,5 +25,21 @@ export const KEYWORDS = [
   "Accentio Studios",
 ];
 
-/** Verified profiles for schema.org `sameAs` / IndieAuth rel="me". */
-export const SAME_AS = links.map((l) => l.url);
+const urlOf = (key: string) => links.find((l) => l.key === key)?.url ?? "";
+
+/**
+ * schema.org `sameAs` for the Person must only contain URLs that identify
+ * Angela herself (LinkedIn, Behance, her blog author page). The studio's
+ * YouTube/Instagram belong to the Organization, not the person.
+ */
+export const PERSON_SAME_AS = ["linkedin", "behance", "blog"].map(urlOf).filter(Boolean);
+
+/** Accentio Studios — modeled as the Organization Angela works for. */
+export const ORGANIZATION = {
+  name: "Accentio Studios",
+  url: "https://accentiostudios.com",
+  sameAs: ["youtube", "instagram"].map(urlOf).filter(Boolean),
+};
+
+/** Stable last-modified date (ISO) shared by the sitemap and JSON-LD. */
+export const LAST_MODIFIED = "2026-06-10";

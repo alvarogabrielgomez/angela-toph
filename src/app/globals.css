@@ -57,6 +57,13 @@ body {
   transform: translateY(-2px);
 }
 
+/* Visible keyboard focus (WCAG 2.4.7); outline-offset clears the rounded pills */
+.linkRow:focus-visible,
+button:focus-visible {
+  outline: 2px solid #6fe3f2;
+  outline-offset: 3px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

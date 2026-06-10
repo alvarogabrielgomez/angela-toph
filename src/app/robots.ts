@@ -8,6 +8,8 @@ const AI_CRAWLERS = [
   "ChatGPT-User",
   "ClaudeBot",
   "Claude-Web",
+  "Claude-User",
+  "Claude-SearchBot",
   "anthropic-ai",
   "PerplexityBot",
   "Perplexity-User",
@@ -18,6 +20,8 @@ const AI_CRAWLERS = [
   "cohere-ai",
   "DuckAssistBot",
   "Meta-ExternalAgent",
+  "MistralAI-User",
+  "Bytespider",
   "YouBot",
 ];
 

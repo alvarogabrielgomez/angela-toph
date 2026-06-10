@@ -18,6 +18,20 @@ export const bios: Record<Lang, string> = {
   pt: "Sou copywriter e UX Designer. Crio conteúdo e estratégias que ajudam a atrair potenciais clientes, aumentar o valor percebido e a usabilidade de um produto, e fortalecer a relação dos consumidores com as marcas.",
 };
 
+/** Concise (~150 char) SEO meta descriptions — the full bio is too long for a SERP snippet. */
+export const metaDescriptions: Record<Lang, string> = {
+  es: "Copywriter y UX Designer. Creo contenido y estrategias UX que atraen clientes, elevan el valor percibido y mejoran la usabilidad de tu producto.",
+  en: "Copywriter and UX Designer. I craft content and UX strategies that attract clients, raise perceived value and improve your product's usability.",
+  pt: "Copywriter e UX Designer. Crio conteúdo e estratégias de UX que atraem clientes, elevam o valor percebido e melhoram a usabilidade do produto.",
+};
+
+/** Full language names for accessible control labels. */
+export const LANG_NAMES: Record<Lang, string> = {
+  es: "Español",
+  en: "English",
+  pt: "Português",
+};
+
 export type IconKey = "linkedin" | "blog" | "youtube" | "instagram" | "behance";
 
 export interface LinkItem {

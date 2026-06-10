@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat, Karla, JetBrains_Mono } from "next/font/google";
-import { bios } from "@/data/content";
+import { metaDescriptions } from "@/data/content";
 import {
   SITE_URL,
   PERSON_NAME,
@@ -33,11 +33,12 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const title = `${PERSON_NAME} — ${PERSON_ROLE}`;
+const description = metaDescriptions.es;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title,
-  description: bios.es,
+  description,
   applicationName: PERSON_NAME,
   authors: [{ name: PERSON_NAME, url: SITE_URL }],
   creator: PERSON_NAME,
@@ -61,7 +62,7 @@ export const metadata: Metadata = {
     firstName: PERSON_FIRST_NAME,
     lastName: PERSON_LAST_NAME,
     title,
-    description: bios.es,
+    description,
     url: SITE_URL,
     siteName: PERSON_NAME,
     locale: "es_ES",
@@ -70,14 +71,21 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title,
-    description: bios.es,
+    description,
   },
   appleWebApp: {
     capable: true,
     title: PERSON_NAME,
     statusBarStyle: "black-translucent",
   },
-  icons: { icon: "/angela.jpg", apple: "/angela.jpg" },
+  icons: {
+    icon: [
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export const viewport: Viewport = {

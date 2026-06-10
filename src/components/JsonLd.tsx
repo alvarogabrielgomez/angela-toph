@@ -1,5 +1,12 @@
-import { bios } from "@/data/content";
-import { SITE_URL, PERSON_NAME, PERSON_ROLE, SAME_AS } from "@/data/site";
+import { metaDescriptions } from "@/data/content";
+import {
+  SITE_URL,
+  PERSON_NAME,
+  PERSON_ROLE,
+  PERSON_SAME_AS,
+  ORGANIZATION,
+  LAST_MODIFIED,
+} from "@/data/site";
 
 // schema.org structured data — the strongest machine-readable signal for search
 // engines and LLM crawlers to understand who this page is about.
@@ -8,17 +15,25 @@ export default function JsonLd() {
     "@context": "https://schema.org",
     "@type": "ProfilePage",
     url: SITE_URL,
-    inLanguage: ["es", "en", "pt"],
+    inLanguage: "es",
+    dateModified: LAST_MODIFIED,
     mainEntity: {
       "@type": "Person",
       name: PERSON_NAME,
       jobTitle: PERSON_ROLE,
-      description: bios.es,
+      description: metaDescriptions.es,
       image: `${SITE_URL}/angela.jpg`,
       url: SITE_URL,
-      sameAs: SAME_AS,
+      mainEntityOfPage: SITE_URL,
+      sameAs: PERSON_SAME_AS,
       knowsAbout: ["Copywriting", "UX Design", "UX Writing", "Content Strategy"],
       knowsLanguage: ["es", "en", "pt"],
+      worksFor: {
+        "@type": "Organization",
+        name: ORGANIZATION.name,
+        url: ORGANIZATION.url,
+        sameAs: ORGANIZATION.sameAs,
+      },
     },
   };
 
