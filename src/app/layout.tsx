@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Montserrat, Karla, JetBrains_Mono } from "next/font/google";
 import { metaDescriptions } from "@/data/content";
 import {
@@ -102,7 +103,10 @@ export default function RootLayout({
       lang="es"
       className={`${karla.variable} ${montserrat.variable} ${jetbrainsMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
