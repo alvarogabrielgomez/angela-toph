@@ -99,7 +99,7 @@ function section(value: unknown, path: string): Record<string, unknown> {
   return value;
 }
 
-function validate(data: unknown): Profile {
+export function validateProfile(data: unknown): Profile {
   const root = section(data, "(root)");
 
   const links = (() => {
@@ -162,4 +162,4 @@ function validate(data: unknown): Profile {
   };
 }
 
-export const profile: Profile = validate(raw);
+export const profile: Profile = validateProfile(raw);
