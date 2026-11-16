@@ -76,9 +76,19 @@ Edit `src/data/profile.json`. The page, meta tags, JSON-LD, manifest, OG image,
 sitemap and `llms.txt` all read from it. `next build` fails with a message naming
 the field if the file is invalid.
 
-Two changes still need code: a new network needs an icon in
-`components/icons.tsx` and its key in `ICON_KEYS` (`data/profile.ts`), and a new
-language needs its code in `LANGS`.
+To add a network, add an entry to `links`. Its `key` uses lowercase letters,
+digits and hyphens, and no other link shares it. The optional `icon` takes one of
+three forms:
+
+- A built-in name: `"icon": "behance"`. The names are `linkedin`, `blog`,
+  `youtube`, `instagram` and `behance`.
+- Your own SVG: `"icon": { "viewBox": "0 0 24 24", "paths": ["M0 0L24 24"] }`.
+  `paths` lists the `d` attribute of each `<path>`, which only accepts SVG path
+  commands, numbers and separators.
+- Nothing. A `key` that matches a built-in name gets that icon, and any other
+  `key` gets a generic link icon.
+
+One change still needs code: a new language needs its code in `LANGS`.
 
 ## Project structure
 

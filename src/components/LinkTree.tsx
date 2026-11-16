@@ -196,7 +196,7 @@ export default function LinkTree() {
             }}
           >
             <span style={{ width: "20px", height: "20px", flex: "0 0 20px", color: "#6FE3F2" }}>
-              <Icon name={link.key} />
+              <Icon icon={link.icon} />
             </span>
             <span style={{ flex: 1, fontFamily: DISPLAY, fontWeight: 700, fontSize: "14.5px", textAlign: "left" }}>
               {link.label}

@@ -1,9 +1,9 @@
 import type { CSSProperties } from "react";
-import type { IconKey } from "@/data/content";
+import type { BuiltinIcon, LinkIcon } from "@/data/profile";
 
 const fill: CSSProperties = { width: "100%", height: "100%", display: "block" };
 
-const PATHS: Record<Exclude<IconKey, "blog">, string> = {
+const PATHS: Record<Exclude<BuiltinIcon, "blog">, string> = {
   linkedin:
     "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z",
   behance:
@@ -19,20 +19,34 @@ const BLOG_PATHS = [
   "M50.3766 50.2407C50.0003 50.655 49.6397 51.0534 49.232 51.4678L48.8714 51.8821L48.7773 51.9777L47.9307 52.7904L47.8052 52.902L46.9899 53.635C45.6922 54.8101 44.3026 55.876 42.835 56.8222H55.6448V42.5438C54.1995 45.3153 52.4306 47.8996 50.3766 50.2407Z",
 ];
 
-export function Icon({ name }: { name: IconKey }) {
-  if (name === "blog") {
-    return (
-      <svg viewBox="0 0 56 57" xmlns="http://www.w3.org/2000/svg" style={fill} aria-hidden="true">
-        {BLOG_PATHS.map((d, i) => (
-          <path key={i} d={d} fill="currentColor" />
-        ))}
-      </svg>
-    );
-  }
+/**
+ * Fallback for a link with no icon of its own: two interlocked rings, drawn for
+ * this project (no third-party artwork), 24x24, filled with `currentColor`.
+ */
+const GENERIC_PATH =
+  "M4.22 12.71L6.34 10.59A5 5 0 0 1 13.41 17.66L11.29 19.78A5 5 0 0 1 4.22 12.71ZM5.99 14.47A2.5 2.5 0 0 0 9.53 18.01L11.65 15.89A2.5 2.5 0 0 0 8.11 12.35ZM10.59 6.34L12.71 4.22A5 5 0 0 1 19.78 11.29L17.66 13.41A5 5 0 0 1 10.59 6.34ZM12.35 8.11A2.5 2.5 0 0 0 15.89 11.65L18.01 9.53A2.5 2.5 0 0 0 14.47 5.99Z";
 
+function Glyph({ viewBox, paths }: { viewBox: string; paths: readonly string[] }) {
   return (
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={fill} aria-hidden="true">
-      <path d={PATHS[name]} fill="currentColor" />
+    <svg viewBox={viewBox} xmlns="http://www.w3.org/2000/svg" style={fill} aria-hidden="true">
+      {paths.map((d, i) => (
+        <path key={i} d={d} fill="currentColor" />
+      ))}
     </svg>
   );
+}
+
+export function Icon({ icon }: { icon: LinkIcon }) {
+  switch (icon.kind) {
+    case "custom":
+      return <Glyph viewBox={icon.viewBox} paths={icon.paths} />;
+    case "generic":
+      return <Glyph viewBox="0 0 24 24" paths={[GENERIC_PATH]} />;
+    case "builtin":
+      return icon.name === "blog" ? (
+        <Glyph viewBox="0 0 56 57" paths={BLOG_PATHS} />
+      ) : (
+        <Glyph viewBox="0 0 24 24" paths={[PATHS[icon.name]]} />
+      );
+  }
 }

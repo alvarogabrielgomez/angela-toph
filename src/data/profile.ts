@@ -7,23 +7,31 @@ import raw from "./profile.json";
  * while prerendering, so an invalid profile fails `next build` instead of
  * shipping a broken page.
  *
- * The languages and icon keys stay in code: each language needs locale wiring
- * and each network needs an SVG in `components/icons.tsx`.
+ * The languages stay in code: each language needs locale wiring. Link icons
+ * live in the JSON: a built-in name, a custom SVG, or the generic link glyph.
  */
 
 export const LANGS = ["es", "en", "pt"] as const;
 export type Lang = (typeof LANGS)[number];
 
-export const ICON_KEYS = ["linkedin", "blog", "youtube", "instagram", "behance"] as const;
-export type IconKey = (typeof ICON_KEYS)[number];
+/** Icons drawn by `components/icons.tsx`; a link can name one in `icon`. */
+export const BUILTIN_ICONS = ["linkedin", "blog", "youtube", "instagram", "behance"] as const;
+export type BuiltinIcon = (typeof BUILTIN_ICONS)[number];
+
+export type LinkIcon =
+  | { kind: "builtin"; name: BuiltinIcon }
+  | { kind: "custom"; viewBox: string; paths: string[] }
+  | { kind: "generic" };
 
 export interface LinkItem {
-  key: IconKey;
+  /** Lowercase letters, digits and hyphens; unique across links. */
+  key: string;
   label: string;
   handle: string;
   url: string;
   /** One-line description, used in llms.txt. */
   description: string;
+  icon: LinkIcon;
 }
 
 export interface Profile {
@@ -38,13 +46,13 @@ export interface Profile {
     photo: string;
     focus: string[];
     /** Link keys that identify the person (schema.org `sameAs`). */
-    sameAs: IconKey[];
+    sameAs: string[];
   };
   organization: {
     name: string;
     url: string;
     /** Link keys that belong to the organization (schema.org `sameAs`). */
-    sameAs: IconKey[];
+    sameAs: string[];
   };
   keywords: string[];
   llmsSummary: string;
@@ -80,11 +88,48 @@ function textList(value: unknown, path: string): string[] {
   return value.map((item, i) => text(item, `${path}[${i}]`));
 }
 
-function iconKey(value: unknown, path: string): IconKey {
-  if (!ICON_KEYS.includes(value as IconKey)) {
-    fail(`"${path}" is "${String(value)}"; valid keys: ${ICON_KEYS.join(", ")}`);
+function isBuiltinIcon(value: unknown): value is BuiltinIcon {
+  return BUILTIN_ICONS.includes(value as BuiltinIcon);
+}
+
+const LINK_KEY = /^[a-z0-9-]+$/;
+const VIEW_BOX = /^-?\d+(\.\d+)? -?\d+(\.\d+)? \d+(\.\d+)? \d+(\.\d+)?$/;
+// Only path commands, numbers and separators: nothing that could close the
+// `d` attribute or open a tag.
+const PATH_DATA = /^[MmLlHhVvCcSsQqTtAaZz0-9.,\s-]+$/;
+
+function linkKey(value: unknown, path: string, seen: Set<string>): string {
+  const key = text(value, path);
+  if (!LINK_KEY.test(key)) {
+    fail(`"${path}" must match ${LINK_KEY} (lowercase letters, digits and "-"), got "${key}"`);
   }
-  return value as IconKey;
+  if (seen.has(key)) fail(`"${path}" "${key}" is repeated`);
+  seen.add(key);
+  return key;
+}
+
+function linkIcon(value: unknown, key: string, path: string): LinkIcon {
+  if (value === undefined) {
+    return isBuiltinIcon(key) ? { kind: "builtin", name: key } : { kind: "generic" };
+  }
+  if (typeof value === "string") {
+    if (!isBuiltinIcon(value)) {
+      fail(`"${path}" is "${value}"; built-in icons: ${BUILTIN_ICONS.join(", ")}`);
+    }
+    return { kind: "builtin", name: value };
+  }
+  if (!isRecord(value)) {
+    fail(`"${path}" must be a built-in icon name or an object with "viewBox" and "paths"`);
+  }
+  const viewBox = text(value.viewBox, `${path}.viewBox`);
+  if (!VIEW_BOX.test(viewBox)) {
+    fail(`"${path}.viewBox" must be four numbers like "0 0 24 24", got "${viewBox}"`);
+  }
+  const paths = textList(value.paths, `${path}.paths`).map((d, i) => {
+    if (!PATH_DATA.test(d)) fail(`"${path}.paths[${i}]" must contain only SVG path commands`);
+    return d;
+  });
+  return { kind: "custom", viewBox, paths };
 }
 
 function perLang(value: unknown, path: string): Record<Lang, string> {
@@ -104,23 +149,26 @@ export function validateProfile(data: unknown): Profile {
 
   const links = (() => {
     if (!Array.isArray(root.links) || root.links.length === 0) fail(`"links" must be a non-empty list`);
+    const seen = new Set<string>();
     return root.links.map((item, i): LinkItem => {
       const link = section(item, `links[${i}]`);
+      const key = linkKey(link.key, `links[${i}].key`, seen);
       return {
-        key: iconKey(link.key, `links[${i}].key`),
+        key,
         label: text(link.label, `links[${i}].label`),
         handle: text(link.handle, `links[${i}].handle`),
         url: url(link.url, `links[${i}].url`),
         description: text(link.description, `links[${i}].description`),
+        icon: linkIcon(link.icon, key, `links[${i}].icon`),
       };
     });
   })();
 
   const linked = new Set(links.map((l) => l.key));
-  const linkKeys = (value: unknown, path: string): IconKey[] => {
+  const linkKeys = (value: unknown, path: string): string[] => {
     if (!Array.isArray(value)) fail(`"${path}" must be a list of link keys`);
     return value.map((item, i) => {
-      const key = iconKey(item, `${path}[${i}]`);
+      const key = text(item, `${path}[${i}]`);
       if (!linked.has(key)) fail(`"${path}[${i}]" is "${key}", which is not in "links"`);
       return key;
     });

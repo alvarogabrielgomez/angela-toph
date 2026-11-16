@@ -2,7 +2,7 @@ import { LANGS, profile, type Lang } from "@/data/profile";
 
 // Content lives in profile.json; this module re-exports it under the names the
 // UI already uses, plus the language helpers.
-export { LANGS, type Lang, type IconKey, type LinkItem } from "@/data/profile";
+export { LANGS, type Lang, type LinkIcon, type LinkItem } from "@/data/profile";
 
 export const DEFAULT_LANG: Lang = "es";
 
