@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { profile } from "@/data/profile";
 import { validateProfile } from "../profile";
 import { fixture } from "./fixture";
 
@@ -29,5 +30,9 @@ describe("validateProfile", () => {
     const d = fixture();
     d.links[0].url = "linkedin.com/x";
     expect(() => validateProfile(d)).toThrow('"links[0].url" must be an http(s) URL');
+  });
+
+  it("resolves the @/ alias from tsconfig paths", () => {
+    expect(profile.person.name).toBe("Angela Potenza");
   });
 });
