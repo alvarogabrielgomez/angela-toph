@@ -61,7 +61,7 @@ No environment variables are required to build or run.
   `public/`, generated from the avatar.
 - **Routes** — `robots.txt` (explicitly allows major search + LLM crawlers:
   GPTBot, ClaudeBot, PerplexityBot, Google-Extended, Bytespider, …),
-  `sitemap.xml`, `manifest.webmanifest`, and `public/llms.txt`
+  `sitemap.xml`, `manifest.webmanifest`, and `llms.txt`
   ([llmstxt.org](https://llmstxt.org)) for LLM ingestion.
 - **A11y** — semantic `<main>/<header>/<nav>`, single `<h1>`, decorative layer
   `aria-hidden`, visible `:focus-visible` ring, labelled language toggle,
@@ -69,6 +69,16 @@ No environment variables are required to build or run.
 
 Set `NEXT_PUBLIC_SITE_URL` (see `.env.example`) so canonical / OG / sitemap /
 JSON-LD URLs use your real domain instead of the `*.vercel.app` placeholder.
+
+## Editing content
+
+Edit `src/data/profile.json`. The page, meta tags, JSON-LD, manifest, OG image,
+sitemap and `llms.txt` all read from it. `next build` fails with a message naming
+the field if the file is invalid.
+
+Two changes still need code: a new network needs an icon in
+`components/icons.tsx` and its key in `ICON_KEYS` (`data/profile.ts`), and a new
+language needs its code in `LANGS`.
 
 ## Project structure
 
@@ -82,8 +92,12 @@ src/
     Background.tsx # starfield, glow blobs, film grain, bottom halo (static)
     LinkTree.tsx   # avatar, name, badge, bio, links, language switcher (client)
     icons.tsx      # inline brand SVG icons
+    llms.txt/route.ts # llms.txt, generated from profile.json at build time
   data/
-    content.ts     # bio copy (ES/EN/PT) + link list
+    profile.json   # ALL editable content: name, role, bios, links, SEO, org
+    profile.ts     # types + validation of profile.json (build fails if invalid)
+    content.ts     # language helpers + re-exports for the UI
+    site.ts        # SEO constants derived from profile.json
 public/
   angela.jpg       # avatar
 ```

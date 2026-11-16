@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { PERSON_NAME, PERSON_ROLE } from "@/data/site";
+import { PERSON_NAME, PERSON_PHOTO, PERSON_ROLE } from "@/data/site";
 
 export const runtime = "nodejs";
 export const alt = `${PERSON_NAME} — ${PERSON_ROLE}`;
@@ -9,8 +9,9 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OpengraphImage() {
-  const avatar = await readFile(join(process.cwd(), "public", "angela.jpg"));
-  const avatarSrc = `data:image/jpeg;base64,${avatar.toString("base64")}`;
+  const avatar = await readFile(join(process.cwd(), "public", PERSON_PHOTO));
+  const mime = PERSON_PHOTO.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+  const avatarSrc = `data:${mime};base64,${avatar.toString("base64")}`;
 
   return new ImageResponse(
     (

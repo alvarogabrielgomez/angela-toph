@@ -6,7 +6,10 @@ import {
   PERSON_SAME_AS,
   ORGANIZATION,
   LAST_MODIFIED,
+  PERSON_PHOTO,
+  PERSON_FOCUS,
 } from "@/data/site";
+import { LANGS } from "@/data/content";
 
 // schema.org structured data — the strongest machine-readable signal for search
 // engines and LLM crawlers to understand who this page is about.
@@ -22,12 +25,12 @@ export default function JsonLd() {
       name: PERSON_NAME,
       jobTitle: PERSON_ROLE,
       description: metaDescriptions.es,
-      image: `${SITE_URL}/angela.jpg`,
+      image: `${SITE_URL}${PERSON_PHOTO}`,
       url: SITE_URL,
       mainEntityOfPage: SITE_URL,
       sameAs: PERSON_SAME_AS,
-      knowsAbout: ["Copywriting", "UX Design", "UX Writing", "Content Strategy"],
-      knowsLanguage: ["es", "en", "pt"],
+      knowsAbout: PERSON_FOCUS,
+      knowsLanguage: LANGS,
       worksFor: {
         "@type": "Organization",
         name: ORGANIZATION.name,

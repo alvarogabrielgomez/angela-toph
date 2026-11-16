@@ -4,6 +4,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/icons";
 import { bios, links, LANGS, LANG_NAMES, type Lang } from "@/data/content";
+import { PERSON_NAME, PERSON_PHOTO, PERSON_ROLE } from "@/data/site";
 import {
   subscribe,
   getSnapshot,
@@ -103,8 +104,8 @@ export default function LinkTree() {
             }}
           >
             <Image
-              src="/angela.jpg"
-              alt="Angela Potenza"
+              src={PERSON_PHOTO}
+              alt={PERSON_NAME}
               width={112}
               height={112}
               priority
@@ -133,7 +134,7 @@ export default function LinkTree() {
             textShadow: "0 4px 30px rgba(124,58,237,0.5)",
           }}
         >
-          Angela Potenza
+          {PERSON_NAME}
         </h1>
 
         <div
@@ -151,7 +152,7 @@ export default function LinkTree() {
             boxShadow: "0 6px 24px rgba(8,190,216,0.35)",
           }}
         >
-          Copywriter &amp; UX Designer
+          {PERSON_ROLE}
         </div>
 
         <p
