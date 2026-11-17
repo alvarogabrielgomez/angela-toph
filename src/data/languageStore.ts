@@ -58,7 +58,7 @@ export function setLanguage(next: Lang): void {
   try {
     window.localStorage.setItem(LANG_STORAGE_KEY, next);
   } catch (error) {
-    // The choice still applies for this visit; it is just not remembered.
+    // The choice still applies for this visit and resets on the next one.
     console.warn("Could not save the language to localStorage.", error);
   }
   listeners.forEach((l) => l());

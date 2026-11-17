@@ -75,7 +75,7 @@ export interface Theme {
 }
 
 export interface Profile {
-  /** An http(s) origin, with no trailing "/": paths are appended to it. */
+  /** An http(s) origin with no trailing "/", because the site appends paths to it. */
   siteUrl: string;
   lastModified: string;
   person: {

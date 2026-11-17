@@ -13,7 +13,7 @@ import {
 /**
  * Serializes JSON-LD for inline use in a script tag. Every `<` becomes the
  * JSON escape backslash-u003c, so text from profile.json such as a closing
- * script tag cannot end the element early. JSON parsers read the escape back
+ * script tag cannot close the element. JSON parsers read the escape back
  * as `<`.
  */
 export function serializeJsonLd(data: unknown): string {

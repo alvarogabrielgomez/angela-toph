@@ -77,7 +77,7 @@ JSON-LD URLs use your real domain instead of the `*.vercel.app` placeholder.
 Edit `src/data/profile.json`. The page, meta tags, JSON-LD, manifest, OG image,
 sitemap and `llms.txt` all read from it. `next build` fails with a message naming
 the field if the file is invalid. A JSON syntax error, such as a trailing comma,
-fails earlier, when the bundler parses the file, and its message names no field.
+fails when the bundler parses the file, and its message names no field.
 
 To add a network, add an entry to `links`. Give it a `key` of lowercase letters,
 digits and hyphens that no other link uses. The optional `icon` takes one of
