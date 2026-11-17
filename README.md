@@ -15,8 +15,8 @@ on **Vercel**.
 
 - Self-hosted Google Fonts via `next/font` (Montserrat, Karla, JetBrains Mono).
 - Optimized avatar via `next/image`.
-- Client-side language switcher for the languages listed in `profile.json`. Only
-  the bio copy is localized, matching the original design.
+- Client-side language switcher for the languages listed in `profile.json`. The
+  site localizes only the bio copy, as the original design does.
 - Respects `prefers-reduced-motion`.
 
 ## Develop
@@ -32,9 +32,11 @@ Other scripts:
 npm run build    # production build
 npm run start    # serve the production build
 npm run lint     # eslint (flat config)
+npm test         # vitest run
 ```
 
-Requires Node `>=20.9.0`.
+The app requires Node `>=20.9.0`. `npm test` runs Vitest 5, which needs Node
+`^22.12`, `^24` or `>=26`.
 
 ## Deploy to Vercel
 
@@ -74,7 +76,8 @@ JSON-LD URLs use your real domain instead of the `*.vercel.app` placeholder.
 
 Edit `src/data/profile.json`. The page, meta tags, JSON-LD, manifest, OG image,
 sitemap and `llms.txt` all read from it. `next build` fails with a message naming
-the field if the file is invalid.
+the field if the file is invalid. A JSON syntax error, such as a trailing comma,
+fails earlier, when the bundler parses the file, and its message names no field.
 
 To add a network, add an entry to `links`. Give it a `key` of lowercase letters,
 digits and hyphens that no other link uses. The optional `icon` takes one of
@@ -130,11 +133,11 @@ src/
     layout.tsx     # fonts, <html>/<body>, SEO metadata, viewport/theme-color
     page.tsx       # gradient wrapper + Background + LinkTree
     globals.css    # reset, keyframes, link hover, reduced-motion
+    llms.txt/route.ts # llms.txt, generated from profile.json at build time
   components/
     Background.tsx # starfield, glow blobs, film grain, bottom halo (static)
     LinkTree.tsx   # avatar, name, badge, bio, links, language switcher (client)
-    icons.tsx      # inline brand SVG icons
-    llms.txt/route.ts # llms.txt, generated from profile.json at build time
+    icons.tsx      # link icons: built-in SVGs, custom SVGs from profile.json, generic glyph
   data/
     profile.json   # ALL editable content: name, role, bios, links, colors, SEO, org
     profile.ts     # types + validation of profile.json (build fails if invalid)
