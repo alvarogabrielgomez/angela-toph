@@ -22,8 +22,9 @@ export function resolveLanguage(stored: string | null, browser: readonly string[
 function readStored(): string | null {
   try {
     return window.localStorage.getItem(LANG_STORAGE_KEY);
-  } catch {
+  } catch (error) {
     // localStorage may be unavailable (private mode / blocked storage).
+    console.warn("Could not read the saved language from localStorage.", error);
     return null;
   }
 }
@@ -56,8 +57,9 @@ export function setLanguage(next: Lang): void {
   current = next;
   try {
     window.localStorage.setItem(LANG_STORAGE_KEY, next);
-  } catch {
-    // Ignore persistence failures.
+  } catch (error) {
+    // The choice still applies for this visit; it is just not remembered.
+    console.warn("Could not save the language to localStorage.", error);
   }
   listeners.forEach((l) => l());
 }

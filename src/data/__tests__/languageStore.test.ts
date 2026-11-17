@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveLanguage } from "../languageStore";
 
 // Fixed language list: editing the languages in profile.json never breaks
@@ -36,5 +36,52 @@ describe("resolveLanguage", () => {
 
   it("falls back to the default language when the browser reports none", () => {
     expect(resolveLanguage(null, [])).toBe("es");
+  });
+});
+
+describe("language store storage failures", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    vi.resetModules();
+  });
+
+  /** A browser whose localStorage throws, like private mode or blocked storage. */
+  function blockedStorage() {
+    const boom = new Error("storage blocked");
+    vi.stubGlobal("window", {
+      navigator: { languages: ["en-US"], language: "en-US" },
+      localStorage: {
+        getItem: () => {
+          throw boom;
+        },
+        setItem: () => {
+          throw boom;
+        },
+      },
+    });
+    return boom;
+  }
+
+  it("logs a warning and falls back to the browser language when reading fails", async () => {
+    const boom = blockedStorage();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.resetModules();
+    const store = await import("../languageStore");
+    expect(store.getSnapshot()).toBe("en");
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("read"), boom);
+  });
+
+  it("logs a warning and still notifies subscribers when saving fails", async () => {
+    const boom = blockedStorage();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.resetModules();
+    const store = await import("../languageStore");
+    const listener = vi.fn();
+    store.subscribe(listener);
+    store.setLanguage("pt");
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("save"), boom);
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(store.getSnapshot()).toBe("pt");
   });
 });
