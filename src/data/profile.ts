@@ -75,6 +75,7 @@ export interface Theme {
 }
 
 export interface Profile {
+  /** An http(s) origin, with no trailing "/": paths are appended to it. */
   siteUrl: string;
   lastModified: string;
   person: {
@@ -82,7 +83,7 @@ export interface Profile {
     firstName: string;
     lastName: string;
     role: string;
-    /** Path under `public/`, starting with "/". */
+    /** Path under `public/`, starting with "/" and ending in .jpg, .jpeg or .png. */
     photo: string;
     focus: string[];
     /** Link keys that identify the person (schema.org `sameAs`). */
@@ -127,6 +128,12 @@ function url(value: unknown, path: string): string {
   return s;
 }
 
+function siteUrl(value: unknown): string {
+  const s = url(value, "siteUrl");
+  if (s.endsWith("/")) fail(`"siteUrl" must not end with "/"`);
+  return s;
+}
+
 function textList(value: unknown, path: string): string[] {
   if (!Array.isArray(value) || value.length === 0) fail(`"${path}" must be a non-empty list`);
   return value.map((item, i) => text(item, `${path}[${i}]`));
@@ -145,6 +152,8 @@ const PATH_DATA = /^[MmLlHhVvCcSsQqTtAaZz0-9.,\s-]+$/;
 const LANG_CODE = /^[a-z]{2}$/;
 const OG_LOCALE = /^[a-z]{2}_[A-Z]{2}$/;
 const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
+// The Open Graph card labels a photo as PNG or JPEG and nothing else.
+const PHOTO_EXTENSION = /\.(jpe?g|png)$/i;
 
 function linkKey(value: unknown, path: string, seen: Set<string>): string {
   const key = text(value, path);
@@ -281,6 +290,9 @@ export function validateProfile(data: unknown): Profile {
   const person = section(root.person, "person");
   const photo = text(person.photo, "person.photo");
   if (!photo.startsWith("/")) fail(`"person.photo" must start with "/" (a path under public/)`);
+  if (!PHOTO_EXTENSION.test(photo)) {
+    fail(`"person.photo" must end in .jpg, .jpeg or .png, got "${photo}"`);
+  }
 
   const organization = section(root.organization, "organization");
 
@@ -292,7 +304,7 @@ export function validateProfile(data: unknown): Profile {
   }
 
   return {
-    siteUrl: url(root.siteUrl, "siteUrl"),
+    siteUrl: siteUrl(root.siteUrl),
     lastModified: (() => {
       const d = text(root.lastModified, "lastModified");
       if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) fail(`"lastModified" must be YYYY-MM-DD, got "${d}"`);

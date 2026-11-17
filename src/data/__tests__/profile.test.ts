@@ -264,3 +264,56 @@ describe("content language helpers", () => {
     expect(isLang(null)).toBe(false);
   });
 });
+
+describe("validateProfile photo and site URL", () => {
+  // Each test sets the field it checks, so editing the real photo or site URL
+  // in profile.json never breaks them.
+  function withPhoto(photo: string) {
+    const d = fixture();
+    d.person.photo = photo;
+    return d;
+  }
+
+  function withSiteUrl(siteUrl: string) {
+    const d = fixture();
+    d.siteUrl = siteUrl;
+    return d;
+  }
+
+  it.each(["/me.jpg", "/me.jpeg", "/me.png", "/me.JPG", "/me.Jpeg", "/folder/me.PNG"])(
+    "accepts the photo %s",
+    (photo) => {
+      expect(validateProfile(withPhoto(photo)).person.photo).toBe(photo);
+    },
+  );
+
+  it.each(["/me.webp", "/me.gif", "/me.svg", "/me", "/me.jpg.txt", "/me.jpg/"])(
+    "rejects the photo %s: the Open Graph card reads only jpg, jpeg and png",
+    (photo) => {
+      expect(() => validateProfile(withPhoto(photo))).toThrow(
+        `src/data/profile.json: "person.photo" must end in .jpg, .jpeg or .png, got "${photo}"`,
+      );
+    },
+  );
+
+  it("keeps the leading slash check for a photo without one", () => {
+    expect(() => validateProfile(withPhoto("me.webp"))).toThrow(
+      '"person.photo" must start with "/"',
+    );
+  });
+
+  it("rejects a site URL that ends with a slash", () => {
+    expect(() => validateProfile(withSiteUrl("https://site.example/"))).toThrow(
+      'src/data/profile.json: "siteUrl" must not end with "/"',
+    );
+  });
+
+  it("accepts a site URL without a trailing slash, with or without a path", () => {
+    expect(validateProfile(withSiteUrl("https://site.example")).siteUrl).toBe(
+      "https://site.example",
+    );
+    expect(validateProfile(withSiteUrl("https://site.example/me")).siteUrl).toBe(
+      "https://site.example/me",
+    );
+  });
+});
