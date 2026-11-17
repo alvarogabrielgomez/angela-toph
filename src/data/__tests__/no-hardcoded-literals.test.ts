@@ -6,7 +6,8 @@ import { describe, expect, it } from "vitest";
 /**
  * Guard for the rule "outside profile.json there is no site text or color":
  *
- * - colors: `#RRGGBB` and `rgb(` / `rgba(` with a number, anywhere in
+ * - colors: hex (`#RGB`, `#RRGGBB`, `#RRGGBBAA`) and `rgb(`, `rgba(`, `hsl(`,
+ *   `hsla(`, `lab(`, `lch(`, `oklab(` or `oklch(` with a number, anywhere in
  *   `src/**\/*.{ts,tsx,css}`, comments included;
  * - languages: `lang="xx"` attributes and quoted `"xx_XX"` locales in code
  *   lines of `src/**\/*.{ts,tsx}` (comment-only lines are skipped).
@@ -16,7 +17,11 @@ import { describe, expect, it } from "vitest";
  * moving the line keeps the exception and editing it breaks the guard.
  */
 
-const COLOR = /#[0-9A-Fa-f]{6}\b|rgba?\(\s*\d/;
+// Hex in its three lengths (#RGB, #RRGGBB, #RRGGBBAA), `rgb(`/`rgba(` with a
+// number, and the other color functions with a number. A call that reads a
+// variable, like `rgb(var(--x) / 0.15)`, has no digit first and passes.
+const COLOR =
+  /#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\b|rgba?\(\s*\d|\b(?:hsla?|lab|lch|oklab|oklch)\(\s*[\d.]/;
 const LANGUAGE = /\blang="[a-z]{2}"|["'][a-z]{2}_[A-Z]{2}["']/;
 const COMMENT_LINE = /^\s*(\/\/|\/\*|\*)/;
 
@@ -122,6 +127,37 @@ describe("literal scanner", () => {
     expect(hits("src/app/globals.css", "a { color: #6fe3f2; }")).toHaveLength(1);
     expect(hits("src/app/globals.css", "a { color: rgba(8, 190, 216, 0.15); }")).toHaveLength(1);
     expect(hits("src/app/globals.css", "a { color: rgb( 8 190 216 / 0.15); }")).toHaveLength(1);
+  });
+
+  it("flags an 8-digit hex color, the form the CSS minifier writes", () => {
+    expect(hits("src/app/globals.css", "a { box-shadow: 0 0 26px #08bed840; }")).toHaveLength(1);
+    expect(hits("src/app/page.tsx", `const c = "#0A0818FF";`)).toHaveLength(1);
+  });
+
+  it("flags a 3-digit hex color", () => {
+    expect(hits("src/app/globals.css", "a { color: #FFF; }")).toHaveLength(1);
+    expect(hits("src/app/page.tsx", `const c = "#f0a";`)).toHaveLength(1);
+  });
+
+  it("flags hsl(), hsla(), lab(), lch(), oklab() and oklch() with a number", () => {
+    expect(hits("src/app/globals.css", "a { color: hsl(190 90% 44%); }")).toHaveLength(1);
+    expect(hits("src/app/globals.css", "a { color: hsla(190, 90%, 44%, 0.5); }")).toHaveLength(1);
+    expect(hits("src/app/globals.css", "a { color: lab(50 40 30); }")).toHaveLength(1);
+    expect(hits("src/app/globals.css", "a { color: lch(50 40 30); }")).toHaveLength(1);
+    expect(hits("src/app/globals.css", "a { color: oklab(0.7 0.1 0.1); }")).toHaveLength(1);
+    expect(hits("src/app/globals.css", "a { color: oklch(0.7 0.1 200); }")).toHaveLength(1);
+    expect(hits("src/app/page.tsx", `const c = "oklch(.7 .1 200)";`)).toHaveLength(1);
+  });
+
+  it("does not flag a function that reads a variable", () => {
+    expect(hits("src/app/globals.css", "a { color: hsl(var(--h) 90% 44%); }")).toEqual([]);
+    expect(hits("src/app/globals.css", "a { color: oklch(var(--l) 0.1 200); }")).toEqual([]);
+  });
+
+  it("does not flag an SVG fragment reference or a word that only contains a color function", () => {
+    expect(hits("src/components/Background.tsx", `"<rect filter='url(%23n)'/>"`)).toEqual([]);
+    expect(hits("src/app/page.tsx", `<use href="#main" />`)).toEqual([]);
+    expect(hits("src/app/page.tsx", `const a = slab(1);`)).toEqual([]);
   });
 
   it("reports the line number of each hit", () => {
