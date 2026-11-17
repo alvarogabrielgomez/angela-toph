@@ -101,6 +101,27 @@ profile with a single language hides the language switcher.
 `llmsSummary` is prose and names the languages, so update it by hand when you
 add or remove one.
 
+To change the colors, edit `theme`. Write each color as `#RRGGBB`: a `#` and six
+hex digits, such as `"#08BED8"`. `next build` fails on short forms like `"#FFF"`,
+on names like `"red"` and on any other value.
+
+| Key | Colors |
+| --- | --- |
+| `background` | Page fill, browser theme color and manifest colors |
+| `gradient` | Page background and Open Graph card, top to bottom. Exactly four colors |
+| `accent` | Role badge, selected language, link borders and glows |
+| `accentLight` | Link icons, keyboard focus ring and some stars |
+| `onAccent` | Text on an `accent` fill |
+| `secondary` | Second glow, avatar ring and name shadow |
+| `text` | Name, link labels and body text |
+| `textMuted` | Bio and unselected language buttons |
+| `textSubtle` | Link handles |
+| `surface` | Translucent fill behind the links and the language switcher |
+| `avatarBorder` | Ring between the avatar photo and its gradient border |
+| `star` | Most stars of the starfield |
+
+The code sets the language switcher border to a neutral white.
+
 ## Project structure
 
 ```
@@ -115,9 +136,10 @@ src/
     icons.tsx      # inline brand SVG icons
     llms.txt/route.ts # llms.txt, generated from profile.json at build time
   data/
-    profile.json   # ALL editable content: name, role, bios, links, SEO, org
+    profile.json   # ALL editable content: name, role, bios, links, colors, SEO, org
     profile.ts     # types + validation of profile.json (build fails if invalid)
     content.ts     # language helpers + re-exports for the UI
+    theme.ts       # theme colors + alpha(), gradientCss(), themeCssVars()
     site.ts        # SEO constants derived from profile.json
 public/
   angela.jpg       # avatar

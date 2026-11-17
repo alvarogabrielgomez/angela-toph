@@ -10,7 +10,8 @@ import raw from "./profile.json";
  * The languages live in the JSON too: `languages` lists each code with its
  * display name and Open Graph locale, and `bios` and `metaDescriptions` carry
  * one text per listed code. Link icons live there as well: a built-in name, a
- * custom SVG, or the generic link glyph.
+ * custom SVG, or the generic link glyph. So do the colors: `theme` holds every
+ * color the site draws, each as a six-digit hex string.
  */
 
 /** A language code from `languages`: two lowercase letters, like "es". */
@@ -45,6 +46,34 @@ export interface LinkItem {
   icon: LinkIcon;
 }
 
+/** Every color of the site. Each one is a six-digit hex string with a leading "#". */
+export interface Theme {
+  /** Fill of `html` and `body`; also the browser theme color and the manifest colors. */
+  background: string;
+  /** Page background, top to bottom. Exactly four stops. */
+  gradient: [string, string, string, string];
+  /** Role badge, selected language, link borders and glows. */
+  accent: string;
+  /** Link icons, the keyboard focus ring and some stars. */
+  accentLight: string;
+  /** Text on an accent fill. */
+  onAccent: string;
+  /** Second glow color: the purple blob, the avatar ring end and the name shadow. */
+  secondary: string;
+  /** Name, link labels and body text. */
+  text: string;
+  /** Bio and unselected language buttons. */
+  textMuted: string;
+  /** Link handles. */
+  textSubtle: string;
+  /** Translucent fill behind link rows and the language switcher. */
+  surface: string;
+  /** Ring between the avatar photo and its gradient border. */
+  avatarBorder: string;
+  /** Most stars of the starfield. */
+  star: string;
+}
+
 export interface Profile {
   siteUrl: string;
   lastModified: string;
@@ -73,6 +102,7 @@ export interface Profile {
   languages: Language[];
   bios: Record<Lang, string>;
   metaDescriptions: Record<Lang, string>;
+  theme: Theme;
   links: LinkItem[];
 }
 
@@ -114,6 +144,7 @@ const PATH_DATA = /^[MmLlHhVvCcSsQqTtAaZz0-9.,\s-]+$/;
 // The browser language detection cuts to 2 letters, so a code must be 2 letters.
 const LANG_CODE = /^[a-z]{2}$/;
 const OG_LOCALE = /^[a-z]{2}_[A-Z]{2}$/;
+const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
 
 function linkKey(value: unknown, path: string, seen: Set<string>): string {
   const key = text(value, path);
@@ -183,6 +214,38 @@ function perLang(value: unknown, path: string, codes: readonly Lang[]): Record<L
 function section(value: unknown, path: string): Record<string, unknown> {
   if (!isRecord(value)) fail(`"${path}" must be an object`);
   return value;
+}
+
+function hexColor(value: unknown, path: string): string {
+  const color = text(value, path);
+  if (!HEX_COLOR.test(color)) fail(`"${path}" must be a #RRGGBB color, got "${color}"`);
+  return color;
+}
+
+function gradient(value: unknown, path: string): Theme["gradient"] {
+  if (!Array.isArray(value)) fail(`"${path}" must be a list of 4 colors`);
+  if (value.length !== 4) fail(`"${path}" must have exactly 4 colors, got ${value.length}`);
+  const [a, b, c, d] = value.map((item, i) => hexColor(item, `${path}[${i}]`));
+  return [a, b, c, d];
+}
+
+function themeSection(value: unknown): Theme {
+  const t = section(value, "theme");
+  const color = (key: string) => hexColor(t[key], `theme.${key}`);
+  return {
+    background: color("background"),
+    gradient: gradient(t.gradient, "theme.gradient"),
+    accent: color("accent"),
+    accentLight: color("accentLight"),
+    onAccent: color("onAccent"),
+    secondary: color("secondary"),
+    text: color("text"),
+    textMuted: color("textMuted"),
+    textSubtle: color("textSubtle"),
+    surface: color("surface"),
+    avatarBorder: color("avatarBorder"),
+    star: color("star"),
+  };
 }
 
 export function validateProfile(data: unknown): Profile {
@@ -255,6 +318,7 @@ export function validateProfile(data: unknown): Profile {
     languages,
     bios: perLang(root.bios, "bios", codes),
     metaDescriptions: perLang(root.metaDescriptions, "metaDescriptions", codes),
+    theme: themeSection(root.theme),
     links,
   };
 }

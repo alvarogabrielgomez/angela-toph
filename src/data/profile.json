@@ -44,6 +44,20 @@
     "en": "Copywriter and UX Designer. I craft content and UX strategies that attract clients, raise perceived value and improve your product's usability.",
     "pt": "Copywriter e UX Designer. Crio conteúdo e estratégias de UX que atraem clientes, elevam o valor percebido e melhoram a usabilidade do produto."
   },
+  "theme": {
+    "background": "#0A0818",
+    "gradient": ["#0A0818", "#1A0F38", "#2A1150", "#0E1E36"],
+    "accent": "#08BED8",
+    "accentLight": "#6FE3F2",
+    "onAccent": "#04222A",
+    "secondary": "#7C3AED",
+    "text": "#F3F2F8",
+    "textMuted": "#C9C2E4",
+    "textSubtle": "#9D93C8",
+    "surface": "#0A0718",
+    "avatarBorder": "#140C28",
+    "star": "#E7E2FF"
+  },
   "links": [
     {
       "key": "linkedin",

@@ -10,6 +10,7 @@ import {
   PERSON_LAST_NAME,
   KEYWORDS,
 } from "@/data/site";
+import { theme, themeCssVars } from "@/data/theme";
 import "./globals.css";
 
 const karla = Karla({
@@ -90,7 +91,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0A0818",
+  themeColor: theme.background,
   width: "device-width",
   initialScale: 1,
 };
@@ -102,6 +103,7 @@ export default function RootLayout({
     <html
       lang={DEFAULT_LANG}
       className={`${karla.variable} ${montserrat.variable} ${jetbrainsMono.variable}`}
+      style={themeCssVars(theme)}
     >
       <body>
         {children}
