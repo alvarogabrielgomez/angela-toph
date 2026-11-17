@@ -15,8 +15,8 @@ on **Vercel**.
 
 - Self-hosted Google Fonts via `next/font` (Montserrat, Karla, JetBrains Mono).
 - Optimized avatar via `next/image`.
-- Client-side language switcher (ES / EN / PT) — only the bio copy is localized,
-  matching the original design.
+- Client-side language switcher for the languages listed in `profile.json`. Only
+  the bio copy is localized, matching the original design.
 - Respects `prefers-reduced-motion`.
 
 ## Develop
@@ -88,7 +88,18 @@ three forms:
 - Nothing. A `key` that matches a built-in name gets that icon. Any other `key`
   gets a generic link icon.
 
-A new language needs a code change: add its code to `LANGS`.
+To add a language, add an entry to `languages` with a two-letter lowercase
+`code` (such as `"fr"`), a `name` in that language (`"Français"`) and an
+`ogLocale` (`"fr_FR"`). Add a `bios` text and a `metaDescriptions` text under the
+same code. To remove a language, delete its entry and both texts. `next build`
+fails when a listed language lacks a text or a text has no language.
+
+`defaultLanguage` picks the language for the HTML `lang` attribute, the meta
+description, Open Graph and JSON-LD. It must be one of the listed codes. A
+profile with a single language hides the language switcher.
+
+`llmsSummary` is prose and names the languages, so update it by hand when you
+add or remove one.
 
 ## Project structure
 

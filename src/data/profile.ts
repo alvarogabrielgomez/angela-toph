@@ -7,12 +7,23 @@ import raw from "./profile.json";
  * while prerendering, so an invalid profile fails `next build` instead of
  * shipping a broken page.
  *
- * The languages stay in code: each language needs locale wiring. Link icons
- * live in the JSON: a built-in name, a custom SVG, or the generic link glyph.
+ * The languages live in the JSON too: `languages` lists each code with its
+ * display name and Open Graph locale, and `bios` and `metaDescriptions` carry
+ * one text per listed code. Link icons live there as well: a built-in name, a
+ * custom SVG, or the generic link glyph.
  */
 
-export const LANGS = ["es", "en", "pt"] as const;
-export type Lang = (typeof LANGS)[number];
+/** A language code from `languages`: two lowercase letters, like "es". */
+export type Lang = string;
+
+export interface Language {
+  /** Two lowercase letters: the browser detection cuts to 2 letters. */
+  code: Lang;
+  /** Name in its own language, used for the accessible switcher label. */
+  name: string;
+  /** Open Graph locale, like "es_ES". */
+  ogLocale: string;
+}
 
 /** Icons drawn by `components/icons.tsx`; a link can name one in `icon`. */
 export const BUILTIN_ICONS = ["linkedin", "blog", "youtube", "instagram", "behance"] as const;
@@ -56,7 +67,10 @@ export interface Profile {
   };
   keywords: string[];
   llmsSummary: string;
-  languageNames: Record<Lang, string>;
+  /** Must be one of the codes in `languages`. */
+  defaultLanguage: Lang;
+  /** At least one. The switcher shows only when there are two or more. */
+  languages: Language[];
   bios: Record<Lang, string>;
   metaDescriptions: Record<Lang, string>;
   links: LinkItem[];
@@ -97,6 +111,9 @@ const VIEW_BOX = /^-?\d+(\.\d+)? -?\d+(\.\d+)? \d+(\.\d+)? \d+(\.\d+)?$/;
 // Only path commands, numbers and separators: nothing that could close the
 // `d` attribute or open a tag.
 const PATH_DATA = /^[MmLlHhVvCcSsQqTtAaZz0-9.,\s-]+$/;
+// The browser language detection cuts to 2 letters, so a code must be 2 letters.
+const LANG_CODE = /^[a-z]{2}$/;
+const OG_LOCALE = /^[a-z]{2}_[A-Z]{2}$/;
 
 function linkKey(value: unknown, path: string, seen: Set<string>): string {
   const key = text(value, path);
@@ -132,10 +149,34 @@ function linkIcon(value: unknown, key: string, path: string): LinkIcon {
   return { kind: "custom", viewBox, paths };
 }
 
-function perLang(value: unknown, path: string): Record<Lang, string> {
-  if (!isRecord(value)) fail(`"${path}" must be an object with keys ${LANGS.join(", ")}`);
-  const out = {} as Record<Lang, string>;
-  for (const lang of LANGS) out[lang] = text(value[lang], `${path}.${lang}`);
+function languageList(value: unknown): Language[] {
+  if (!Array.isArray(value) || value.length === 0) fail(`"languages" must be a non-empty list`);
+  const seen = new Set<string>();
+  return value.map((item, i): Language => {
+    const language = section(item, `languages[${i}]`);
+    const code = text(language.code, `languages[${i}].code`);
+    if (!LANG_CODE.test(code)) {
+      fail(`"languages[${i}].code" must match ${LANG_CODE} (two lowercase letters), got "${code}"`);
+    }
+    if (seen.has(code)) fail(`"languages[${i}].code" "${code}" is repeated`);
+    seen.add(code);
+    const name = text(language.name, `languages[${i}].name`);
+    const ogLocale = text(language.ogLocale, `languages[${i}].ogLocale`);
+    if (!OG_LOCALE.test(ogLocale)) {
+      fail(`"languages[${i}].ogLocale" must match ${OG_LOCALE} (like "es_ES"), got "${ogLocale}"`);
+    }
+    return { code, name, ogLocale };
+  });
+}
+
+/** One non-empty text per listed language code, and no text for any other. */
+function perLang(value: unknown, path: string, codes: readonly Lang[]): Record<Lang, string> {
+  if (!isRecord(value)) fail(`"${path}" must be an object with keys ${codes.join(", ")}`);
+  const out: Record<Lang, string> = {};
+  for (const code of codes) out[code] = text(value[code], `${path}.${code}`);
+  for (const key of Object.keys(value)) {
+    if (!codes.includes(key)) fail(`"${path}.${key}" is not in "languages"`);
+  }
   return out;
 }
 
@@ -180,6 +221,13 @@ export function validateProfile(data: unknown): Profile {
 
   const organization = section(root.organization, "organization");
 
+  const languages = languageList(root.languages);
+  const codes = languages.map((l) => l.code);
+  const defaultLanguage = text(root.defaultLanguage, "defaultLanguage");
+  if (!codes.includes(defaultLanguage)) {
+    fail(`"defaultLanguage" is "${defaultLanguage}", which is not in "languages"`);
+  }
+
   return {
     siteUrl: url(root.siteUrl, "siteUrl"),
     lastModified: (() => {
@@ -203,9 +251,10 @@ export function validateProfile(data: unknown): Profile {
     },
     keywords: textList(root.keywords, "keywords"),
     llmsSummary: text(root.llmsSummary, "llmsSummary"),
-    languageNames: perLang(root.languageNames, "languageNames"),
-    bios: perLang(root.bios, "bios"),
-    metaDescriptions: perLang(root.metaDescriptions, "metaDescriptions"),
+    defaultLanguage,
+    languages,
+    bios: perLang(root.bios, "bios", codes),
+    metaDescriptions: perLang(root.metaDescriptions, "metaDescriptions", codes),
     links,
   };
 }

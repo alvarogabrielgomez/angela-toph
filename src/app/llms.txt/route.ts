@@ -1,4 +1,4 @@
-import { LANGS, LANG_NAMES, links } from "@/data/content";
+import { links } from "@/data/content";
 import { profile } from "@/data/profile";
 
 // llms.txt (https://llmstxt.org), built from profile.json. `force-static`
@@ -20,7 +20,7 @@ function buildLlmsTxt(): string {
     `- Name: ${person.name}`,
     `- Role: ${person.role}`,
     `- Focus: ${person.focus.join(", ")}`,
-    `- Languages: ${LANGS.map((l) => LANG_NAMES[l]).join(", ")}`,
+    `- Languages: ${profile.languages.map((l) => l.name).join(", ")}`,
     "",
     "## Links",
     "",

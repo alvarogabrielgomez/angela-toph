@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_LANG, LANGS, LANG_NAMES, OG_LOCALES, isLang } from "@/data/content";
 import { profile } from "@/data/profile";
 import { validateProfile } from "../profile";
 import { fixture } from "./fixture";
@@ -122,5 +123,144 @@ describe("validateProfile link icons", () => {
     expect(() => validateProfile(d)).toThrow(
       '"links[0].icon.paths[0]" must contain only SVG path commands',
     );
+  });
+});
+
+describe("validateProfile languages", () => {
+  const french = { code: "fr", name: "Français", ogLocale: "fr_FR" };
+
+  // The real profile.json lists whatever languages Angela keeps there. These
+  // tests start from a fixed three-language profile so editing the JSON never
+  // breaks them.
+  function trilingual() {
+    const d = fixture();
+    d.defaultLanguage = "es";
+    d.languages = [
+      { code: "es", name: "Español", ogLocale: "es_ES" },
+      { code: "en", name: "English", ogLocale: "en_US" },
+      { code: "pt", name: "Português", ogLocale: "pt_BR" },
+    ];
+    d.bios = { es: "Hola", en: "Hello", pt: "Olá" };
+    d.metaDescriptions = { es: "Hola, en breve", en: "Hello, in short", pt: "Olá, em resumo" };
+    return d;
+  }
+
+  it("rejects a new language without a bio", () => {
+    const d = trilingual();
+    d.languages.push({ ...french });
+    expect(() => validateProfile(d)).toThrow(
+      'src/data/profile.json: "bios.fr" must be a non-empty string',
+    );
+  });
+
+  it("rejects a new language without a meta description", () => {
+    const d = trilingual();
+    d.languages.push({ ...french });
+    d.bios.fr = "Bonjour";
+    expect(() => validateProfile(d)).toThrow('"metaDescriptions.fr" must be a non-empty string');
+  });
+
+  it("accepts a new language with its bio and meta description", () => {
+    const d = trilingual();
+    d.languages.push({ ...french });
+    d.bios.fr = "Bonjour";
+    d.metaDescriptions.fr = "Bonjour, en bref";
+    const result = validateProfile(d);
+    expect(result.languages.map((l) => l.code)).toEqual(["es", "en", "pt", "fr"]);
+    expect(result.bios.fr).toBe("Bonjour");
+  });
+
+  it("rejects a bio for a language that was removed", () => {
+    const d = trilingual();
+    d.languages = d.languages.filter((l: { code: string }) => l.code !== "pt");
+    expect(() => validateProfile(d)).toThrow(
+      'src/data/profile.json: "bios.pt" is not in "languages"',
+    );
+  });
+
+  it("rejects a meta description for a language that was removed", () => {
+    const d = trilingual();
+    d.languages = d.languages.filter((l: { code: string }) => l.code !== "pt");
+    delete d.bios.pt;
+    expect(() => validateProfile(d)).toThrow('"metaDescriptions.pt" is not in "languages"');
+  });
+
+  it("accepts removing a language together with its texts", () => {
+    const d = trilingual();
+    d.languages = d.languages.filter((l: { code: string }) => l.code !== "pt");
+    delete d.bios.pt;
+    delete d.metaDescriptions.pt;
+    expect(validateProfile(d).languages.map((l) => l.code)).toEqual(["es", "en"]);
+  });
+
+  it("rejects a default language that is not in the list", () => {
+    const d = trilingual();
+    d.defaultLanguage = "de";
+    expect(() => validateProfile(d)).toThrow(
+      '"defaultLanguage" is "de", which is not in "languages"',
+    );
+  });
+
+  it("rejects a missing default language", () => {
+    const d = trilingual();
+    delete d.defaultLanguage;
+    expect(() => validateProfile(d)).toThrow('"defaultLanguage" must be a non-empty string');
+  });
+
+  it("rejects a language code that is not two lowercase letters", () => {
+    const d = trilingual();
+    d.languages[0].code = "esp";
+    expect(() => validateProfile(d)).toThrow(/"languages\[0\]\.code" must match/);
+  });
+
+  it("rejects a repeated language code", () => {
+    const d = trilingual();
+    d.languages.push({ ...d.languages[0] });
+    expect(() => validateProfile(d)).toThrow('"languages[3].code" "es" is repeated');
+  });
+
+  it("rejects an Open Graph locale that is not xx_XX", () => {
+    const d = trilingual();
+    d.languages[0].ogLocale = "es-ES";
+    expect(() => validateProfile(d)).toThrow(/"languages\[0\]\.ogLocale" must match/);
+  });
+
+  it("rejects a language without a name", () => {
+    const d = trilingual();
+    delete d.languages[1].name;
+    expect(() => validateProfile(d)).toThrow('"languages[1].name" must be a non-empty string');
+  });
+
+  it("rejects an empty language list", () => {
+    const d = trilingual();
+    d.languages = [];
+    expect(() => validateProfile(d)).toThrow('"languages" must be a non-empty list');
+  });
+
+  it("accepts a single language", () => {
+    const d = trilingual();
+    d.languages = [d.languages[0]];
+    d.bios = { es: d.bios.es };
+    d.metaDescriptions = { es: d.metaDescriptions.es };
+    const result = validateProfile(d);
+    expect(result.languages).toEqual([{ code: "es", name: "Español", ogLocale: "es_ES" }]);
+    expect(result.defaultLanguage).toBe("es");
+  });
+});
+
+describe("content language helpers", () => {
+  it("derives the language constants from profile.json", () => {
+    expect(LANGS).toEqual(profile.languages.map((l) => l.code));
+    expect(DEFAULT_LANG).toBe(profile.defaultLanguage);
+    for (const l of profile.languages) {
+      expect(LANG_NAMES[l.code]).toBe(l.name);
+      expect(OG_LOCALES[l.code]).toBe(l.ogLocale);
+    }
+  });
+
+  it("accepts only the listed language codes", () => {
+    expect(isLang(profile.defaultLanguage)).toBe(true);
+    expect(isLang("zz")).toBe(false);
+    expect(isLang(null)).toBe(false);
   });
 });

@@ -1,26 +1,38 @@
 import { DEFAULT_LANG, LANG_STORAGE_KEY, isLang, type Lang } from "@/data/content";
 
 // Tiny external store so the chosen language can be read via
-// useSyncExternalStore: SSR uses the default ("es"), the client resolves the
+// useSyncExternalStore: SSR uses the default language, the client resolves the
 // real preference from localStorage / the browser language without a hydration
 // mismatch, and updates fan out to every subscriber.
 
 let current: Lang | null = null;
 const listeners = new Set<() => void>();
 
-function resolve(): Lang {
-  if (typeof window === "undefined") return DEFAULT_LANG;
+/**
+ * Picks the language to show. A stored language that profile.json no longer
+ * lists is ignored, then the first listed browser language wins, then the
+ * default.
+ */
+export function resolveLanguage(stored: string | null, browser: readonly string[]): Lang {
+  if (isLang(stored)) return stored;
+  const detected = browser.map((l) => l.slice(0, 2).toLowerCase()).find(isLang);
+  return detected ?? DEFAULT_LANG;
+}
+
+function readStored(): string | null {
   try {
-    const stored = window.localStorage.getItem(LANG_STORAGE_KEY);
-    if (isLang(stored)) return stored;
+    return window.localStorage.getItem(LANG_STORAGE_KEY);
   } catch {
     // localStorage may be unavailable (private mode / blocked storage).
+    return null;
   }
+}
+
+function resolve(): Lang {
+  if (typeof window === "undefined") return DEFAULT_LANG;
   const nav = window.navigator;
-  const candidates =
-    nav.languages && nav.languages.length > 0 ? nav.languages : [nav.language];
-  const detected = candidates.map((l) => l.slice(0, 2).toLowerCase()).find(isLang);
-  return detected ?? DEFAULT_LANG;
+  const browser = nav.languages && nav.languages.length > 0 ? nav.languages : [nav.language];
+  return resolveLanguage(readStored(), browser);
 }
 
 export function subscribe(callback: () => void): () => void {

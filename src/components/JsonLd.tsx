@@ -1,4 +1,4 @@
-import { metaDescriptions } from "@/data/content";
+import { DEFAULT_LANG, LANGS, metaDescriptions } from "@/data/content";
 import {
   SITE_URL,
   PERSON_NAME,
@@ -9,7 +9,6 @@ import {
   PERSON_PHOTO,
   PERSON_FOCUS,
 } from "@/data/site";
-import { LANGS } from "@/data/content";
 
 // schema.org structured data — the strongest machine-readable signal for search
 // engines and LLM crawlers to understand who this page is about.
@@ -18,13 +17,13 @@ export default function JsonLd() {
     "@context": "https://schema.org",
     "@type": "ProfilePage",
     url: SITE_URL,
-    inLanguage: "es",
+    inLanguage: DEFAULT_LANG,
     dateModified: LAST_MODIFIED,
     mainEntity: {
       "@type": "Person",
       name: PERSON_NAME,
       jobTitle: PERSON_ROLE,
-      description: metaDescriptions.es,
+      description: metaDescriptions[DEFAULT_LANG],
       image: `${SITE_URL}${PERSON_PHOTO}`,
       url: SITE_URL,
       mainEntityOfPage: SITE_URL,

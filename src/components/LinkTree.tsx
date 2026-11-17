@@ -68,7 +68,7 @@ function LangSwitcher({
 }
 
 export default function LinkTree() {
-  // SSR renders the default ("es"); useSyncExternalStore resolves the stored /
+  // SSR renders the default language; useSyncExternalStore resolves the stored /
   // browser-detected preference on the client with no hydration mismatch.
   const lang = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
@@ -87,9 +87,11 @@ export default function LinkTree() {
         animation: "fadeUp 0.8s cubic-bezier(0.2,0.7,0.2,1) both",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "30px" }}>
-        <LangSwitcher lang={lang} onChange={setLanguage} />
-      </div>
+      {LANGS.length > 1 && (
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "30px" }}>
+          <LangSwitcher lang={lang} onChange={setLanguage} />
+        </div>
+      )}
 
       <header style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
         <div style={{ animation: "floatY 6s ease-in-out infinite" }}>

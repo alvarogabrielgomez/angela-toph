@@ -28,11 +28,12 @@
     "Accentio Studios"
   ],
   "llmsSummary": "Personal link-in-bio page. Angela creates content and UX strategies that attract potential clients, raise a product's perceived value and usability, and strengthen the bond between brands and their consumers. The page is available in Spanish, English and Portuguese.",
-  "languageNames": {
-    "es": "Español",
-    "en": "English",
-    "pt": "Português"
-  },
+  "defaultLanguage": "es",
+  "languages": [
+    { "code": "es", "name": "Español", "ogLocale": "es_ES" },
+    { "code": "en", "name": "English", "ogLocale": "en_US" },
+    { "code": "pt", "name": "Português", "ogLocale": "pt_BR" }
+  ],
   "bios": {
     "es": "Soy copywriter y UX Designer. Trabajo creando contenido y estrategias que ayudan a atraer potenciales clientes, aumentar el valor percibido y la usabilidad de un producto, y fortalecer la relación de los consumidores con las marcas.",
     "en": "I'm a copywriter and UX Designer. I craft content and strategies that attract potential clients, raise a product's perceived value and usability, and strengthen the bond between brands and their consumers.",
