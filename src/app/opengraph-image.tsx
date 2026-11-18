@@ -1,16 +1,19 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { PERSON_NAME, PERSON_ROLE } from "@/data/site";
+import { PERSON_NAME, PERSON_PHOTO, PERSON_ROLE } from "@/data/site";
+import { alpha, gradientCss, theme } from "@/data/theme";
 
 export const runtime = "nodejs";
 export const alt = `${PERSON_NAME} — ${PERSON_ROLE}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+// Satori cannot resolve CSS variables, so this card reads the theme values directly.
 export default async function OpengraphImage() {
-  const avatar = await readFile(join(process.cwd(), "public", "angela.jpg"));
-  const avatarSrc = `data:image/jpeg;base64,${avatar.toString("base64")}`;
+  const avatar = await readFile(join(process.cwd(), "public", PERSON_PHOTO));
+  const mime = PERSON_PHOTO.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+  const avatarSrc = `data:${mime};base64,${avatar.toString("base64")}`;
 
   return new ImageResponse(
     (
@@ -22,9 +25,8 @@ export default async function OpengraphImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background:
-            "linear-gradient(180deg, #0A0818 0%, #1A0F38 42%, #2A1150 68%, #0E1E36 100%)",
-          color: "#F3F2F8",
+          background: gradientCss(theme.gradient),
+          color: theme.text,
           fontFamily: "sans-serif",
         }}
       >
@@ -37,8 +39,8 @@ export default async function OpengraphImage() {
           style={{
             borderRadius: "50%",
             objectFit: "cover",
-            border: "6px solid #08BED8",
-            boxShadow: "0 0 60px rgba(8,190,216,0.45)",
+            border: `6px solid ${theme.accent}`,
+            boxShadow: `0 0 60px ${alpha(theme.accent, 0.45)}`,
           }}
         />
         <div style={{ fontSize: 76, fontWeight: 800, marginTop: 44, letterSpacing: "-0.02em" }}>
@@ -50,8 +52,8 @@ export default async function OpengraphImage() {
             marginTop: 26,
             padding: "14px 32px",
             borderRadius: 999,
-            background: "#08BED8",
-            color: "#04222A",
+            background: theme.accent,
+            color: theme.onAccent,
             fontSize: 30,
             fontWeight: 700,
             letterSpacing: "0.04em",

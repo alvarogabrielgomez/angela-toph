@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { Montserrat, Karla, JetBrains_Mono } from "next/font/google";
-import { metaDescriptions } from "@/data/content";
+import { DEFAULT_LANG, LANGS, OG_LOCALES, metaDescriptions } from "@/data/content";
 import {
   SITE_URL,
   PERSON_NAME,
@@ -10,6 +10,7 @@ import {
   PERSON_LAST_NAME,
   KEYWORDS,
 } from "@/data/site";
+import { theme, themeCssVars } from "@/data/theme";
 import "./globals.css";
 
 const karla = Karla({
@@ -34,7 +35,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const title = `${PERSON_NAME} — ${PERSON_ROLE}`;
-const description = metaDescriptions.es;
+const description = metaDescriptions[DEFAULT_LANG];
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -66,8 +67,8 @@ export const metadata: Metadata = {
     description,
     url: SITE_URL,
     siteName: PERSON_NAME,
-    locale: "es_ES",
-    alternateLocale: ["en_US", "pt_BR"],
+    locale: OG_LOCALES[DEFAULT_LANG],
+    alternateLocale: LANGS.filter((l) => l !== DEFAULT_LANG).map((l) => OG_LOCALES[l]),
   },
   twitter: {
     card: "summary_large_image",
@@ -90,7 +91,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0A0818",
+  themeColor: theme.background,
   width: "device-width",
   initialScale: 1,
 };
@@ -100,8 +101,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
-      lang="es"
+      lang={DEFAULT_LANG}
       className={`${karla.variable} ${montserrat.variable} ${jetbrainsMono.variable}`}
+      style={themeCssVars(theme)}
     >
       <body>
         {children}

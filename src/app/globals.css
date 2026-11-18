@@ -2,7 +2,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #0a0818;
+  background: var(--color-bg);
 }
 
 * {
@@ -11,7 +11,7 @@ body {
 
 body {
   font-family: var(--font-karla), sans-serif;
-  color: #f3f2f8;
+  color: var(--color-text);
 }
 
 @keyframes fadeUp {
@@ -51,16 +51,16 @@ body {
 }
 
 .linkRow:hover {
-  background: rgba(8, 190, 216, 0.15) !important;
-  border-color: rgba(8, 190, 216, 0.75) !important;
-  box-shadow: 0 0 26px rgba(8, 190, 216, 0.28);
+  background: rgb(var(--color-accent-rgb) / 0.15) !important;
+  border-color: rgb(var(--color-accent-rgb) / 0.75) !important;
+  box-shadow: 0 0 26px rgb(var(--color-accent-rgb) / 0.28);
   transform: translateY(-2px);
 }
 
 /* Visible keyboard focus (WCAG 2.4.7); outline-offset clears the rounded pills */
 .linkRow:focus-visible,
 button:focus-visible {
-  outline: 2px solid #6fe3f2;
+  outline: 2px solid var(--color-accent-light);
   outline-offset: 3px;
 }
 

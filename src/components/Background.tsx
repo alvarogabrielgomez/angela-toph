@@ -1,6 +1,8 @@
 // Static decorative backdrop: starfield, glow blobs, film grain, bottom halo.
 // Rendered on the server (no interactivity).
 
+import { alpha, theme } from "@/data/theme";
+
 const STAR_POINTS: [number, number][] = [
   [8, 6], [22, 14], [37, 4], [52, 10], [66, 7], [81, 13], [93, 5], [14, 22],
   [45, 20], [73, 24], [88, 20], [5, 34], [30, 30], [58, 33], [95, 32], [19, 44],
@@ -27,7 +29,7 @@ export default function Background() {
               width: i % 5 === 0 ? "3px" : "2px",
               height: i % 5 === 0 ? "3px" : "2px",
               borderRadius: "50%",
-              background: i % 4 === 0 ? "#6FE3F2" : "#E7E2FF",
+              background: i % 4 === 0 ? theme.accentLight : theme.star,
               animation: `twinkle ${2.4 + (i % 5) * 0.9}s ease-in-out ${(i % 7) * 0.5}s infinite`,
             }}
           />
@@ -43,8 +45,7 @@ export default function Background() {
           width: "340px",
           height: "340px",
           borderRadius: "50%",
-          background:
-            "radial-gradient(circle at 35% 30%, rgba(8,190,216,0.28) 0%, rgba(8,190,216,0.05) 45%, rgba(8,190,216,0) 70%)",
+          background: `radial-gradient(circle at 35% 30%, ${alpha(theme.accent, 0.28)} 0%, ${alpha(theme.accent, 0.05)} 45%, ${alpha(theme.accent, 0)} 70%)`,
           pointerEvents: "none",
         }}
       />
@@ -58,7 +59,7 @@ export default function Background() {
           width: "320px",
           height: "320px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(124,58,237,0.20) 0%, rgba(124,58,237,0) 65%)",
+          background: `radial-gradient(circle, ${alpha(theme.secondary, 0.2)} 0%, ${alpha(theme.secondary, 0)} 65%)`,
           pointerEvents: "none",
         }}
       />
@@ -84,8 +85,7 @@ export default function Background() {
           right: 0,
           bottom: 0,
           height: "110px",
-          background:
-            "radial-gradient(55% 130px at 50% 115%, rgba(8,190,216,0.28) 0%, rgba(8,190,216,0) 100%)",
+          background: `radial-gradient(55% 130px at 50% 115%, ${alpha(theme.accent, 0.28)} 0%, ${alpha(theme.accent, 0)} 100%)`,
           pointerEvents: "none",
         }}
       />

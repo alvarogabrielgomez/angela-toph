@@ -1,75 +1,35 @@
-export type Lang = "es" | "en" | "pt";
+import { profile, type Lang } from "@/data/profile";
 
-export const LANGS: Lang[] = ["es", "en", "pt"];
+// Content lives in profile.json; this module re-exports it under the names the
+// UI already uses, plus the language helpers.
+export { type Lang, type LinkIcon, type LinkItem } from "@/data/profile";
 
-export const DEFAULT_LANG: Lang = "es";
+/** Language codes, in the order `languages` lists them in profile.json. */
+export const LANGS: readonly Lang[] = profile.languages.map((l) => l.code);
+
+export const DEFAULT_LANG: Lang = profile.defaultLanguage;
+
+/** Language names for the accessible control labels. */
+export const LANG_NAMES: Record<Lang, string> = Object.fromEntries(
+  profile.languages.map((l) => [l.code, l.name]),
+);
+
+/** Open Graph locale per language code. */
+export const OG_LOCALES: Record<Lang, string> = Object.fromEntries(
+  profile.languages.map((l) => [l.code, l.ogLocale]),
+);
 
 /** localStorage key for the user's last chosen language. */
 export const LANG_STORAGE_KEY = "angela-lang";
 
 export function isLang(value: unknown): value is Lang {
-  return value === "es" || value === "en" || value === "pt";
+  return typeof value === "string" && LANGS.includes(value);
 }
 
-/** Bio copy per language (matches the design handoff verbatim). */
-export const bios: Record<Lang, string> = {
-  es: "Soy copywriter y UX Designer. Trabajo creando contenido y estrategias que ayudan a atraer potenciales clientes, aumentar el valor percibido y la usabilidad de un producto, y fortalecer la relación de los consumidores con las marcas.",
-  en: "I'm a copywriter and UX Designer. I craft content and strategies that attract potential clients, raise a product's perceived value and usability, and strengthen the bond between brands and their consumers.",
-  pt: "Sou copywriter e UX Designer. Crio conteúdo e estratégias que ajudam a atrair potenciais clientes, aumentar o valor percebido e a usabilidade de um produto, e fortalecer a relação dos consumidores com as marcas.",
-};
+/** Bio copy per language. */
+export const bios = profile.bios;
 
 /** Concise (~150 char) SEO meta descriptions — the full bio is too long for a SERP snippet. */
-export const metaDescriptions: Record<Lang, string> = {
-  es: "Copywriter y UX Designer. Creo contenido y estrategias UX que atraen clientes, elevan el valor percibido y mejoran la usabilidad de tu producto.",
-  en: "Copywriter and UX Designer. I craft content and UX strategies that attract clients, raise perceived value and improve your product's usability.",
-  pt: "Copywriter e UX Designer. Crio conteúdo e estratégias de UX que atraem clientes, elevam o valor percebido e melhoram a usabilidade do produto.",
-};
+export const metaDescriptions = profile.metaDescriptions;
 
-/** Full language names for accessible control labels. */
-export const LANG_NAMES: Record<Lang, string> = {
-  es: "Español",
-  en: "English",
-  pt: "Português",
-};
-
-export type IconKey = "linkedin" | "blog" | "youtube" | "instagram" | "behance";
-
-export interface LinkItem {
-  key: IconKey;
-  label: string;
-  handle: string;
-  url: string;
-}
-
-export const links: LinkItem[] = [
-  {
-    key: "linkedin",
-    label: "LinkedIn",
-    handle: "in/angelapotenza",
-    url: "https://www.linkedin.com/in/angelapotenza/",
-  },
-  {
-    key: "blog",
-    label: "Accentio Blog",
-    handle: "blog.accentiostudios.com",
-    url: "https://blog.accentiostudios.com/author/angela/",
-  },
-  {
-    key: "youtube",
-    label: "YouTube",
-    handle: "@accentiostudios",
-    url: "https://www.youtube.com/@accentiostudios/featured",
-  },
-  {
-    key: "instagram",
-    label: "Instagram",
-    handle: "@accentiostudios",
-    url: "https://www.instagram.com/accentiostudios",
-  },
-  {
-    key: "behance",
-    label: "Behance",
-    handle: "behance.net/angelap",
-    url: "https://www.behance.net/angelap211ecb2",
-  },
-];
+export const links = profile.links;

@@ -4,6 +4,8 @@ import { useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/icons";
 import { bios, links, LANGS, LANG_NAMES, type Lang } from "@/data/content";
+import { PERSON_NAME, PERSON_PHOTO, PERSON_ROLE } from "@/data/site";
+import { alpha, theme } from "@/data/theme";
 import {
   subscribe,
   getSnapshot,
@@ -30,7 +32,7 @@ function LangSwitcher({
         gap: "3px",
         padding: "3px",
         borderRadius: "999px",
-        background: "rgba(10,7,24,0.5)",
+        background: alpha(theme.surface, 0.5),
         border: "1px solid rgba(255,255,255,0.16)",
       }}
     >
@@ -52,9 +54,9 @@ function LangSwitcher({
               fontWeight: 700,
               letterSpacing: "0.08em",
               fontFamily: MONO,
-              background: on ? "#08BED8" : "transparent",
-              color: on ? "#04222A" : "#C9C2E4",
-              boxShadow: on ? "0 2px 12px rgba(8,190,216,0.35)" : "none",
+              background: on ? theme.accent : "transparent",
+              color: on ? theme.onAccent : theme.textMuted,
+              boxShadow: on ? `0 2px 12px ${alpha(theme.accent, 0.35)}` : "none",
               transition: "all 0.25s ease",
             }}
           >
@@ -67,7 +69,7 @@ function LangSwitcher({
 }
 
 export default function LinkTree() {
-  // SSR renders the default ("es"); useSyncExternalStore resolves the stored /
+  // SSR renders the default language; useSyncExternalStore resolves the stored /
   // browser-detected preference on the client with no hydration mismatch.
   const lang = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
@@ -86,9 +88,11 @@ export default function LinkTree() {
         animation: "fadeUp 0.8s cubic-bezier(0.2,0.7,0.2,1) both",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "30px" }}>
-        <LangSwitcher lang={lang} onChange={setLanguage} />
-      </div>
+      {LANGS.length > 1 && (
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "30px" }}>
+          <LangSwitcher lang={lang} onChange={setLanguage} />
+        </div>
+      )}
 
       <header style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
         <div style={{ animation: "floatY 6s ease-in-out infinite" }}>
@@ -98,13 +102,13 @@ export default function LinkTree() {
               height: "118px",
               borderRadius: "50%",
               padding: "3px",
-              background: "linear-gradient(160deg, rgba(8,190,216,0.9), rgba(124,58,237,0.7))",
-              boxShadow: "0 0 0 10px rgba(8,190,216,0.06), 0 0 50px rgba(8,190,216,0.28)",
+              background: `linear-gradient(160deg, ${alpha(theme.accent, 0.9)}, ${alpha(theme.secondary, 0.7)})`,
+              boxShadow: `0 0 0 10px ${alpha(theme.accent, 0.06)}, 0 0 50px ${alpha(theme.accent, 0.28)}`,
             }}
           >
             <Image
-              src="/angela.jpg"
-              alt="Angela Potenza"
+              src={PERSON_PHOTO}
+              alt={PERSON_NAME}
               width={112}
               height={112}
               priority
@@ -117,7 +121,7 @@ export default function LinkTree() {
                 objectFit: "cover",
                 objectPosition: "60% 18%",
                 display: "block",
-                border: "3px solid #140C28",
+                border: `3px solid ${theme.avatarBorder}`,
               }}
             />
           </div>
@@ -130,10 +134,10 @@ export default function LinkTree() {
             fontSize: "30px",
             letterSpacing: "-0.01em",
             margin: "22px 0 0",
-            textShadow: "0 4px 30px rgba(124,58,237,0.5)",
+            textShadow: `0 4px 30px ${alpha(theme.secondary, 0.5)}`,
           }}
         >
-          Angela Potenza
+          {PERSON_NAME}
         </h1>
 
         <div
@@ -142,16 +146,16 @@ export default function LinkTree() {
             marginTop: "11px",
             padding: "6px 15px",
             borderRadius: "999px",
-            background: "#08BED8",
-            color: "#04222A",
+            background: theme.accent,
+            color: theme.onAccent,
             fontFamily: DISPLAY,
             fontWeight: 700,
             fontSize: "12px",
             letterSpacing: "0.06em",
-            boxShadow: "0 6px 24px rgba(8,190,216,0.35)",
+            boxShadow: `0 6px 24px ${alpha(theme.accent, 0.35)}`,
           }}
         >
-          Copywriter &amp; UX Designer
+          {PERSON_ROLE}
         </div>
 
         <p
@@ -160,7 +164,7 @@ export default function LinkTree() {
             margin: "18px 0 0",
             fontSize: "15px",
             lineHeight: 1.65,
-            color: "#C9C2E4",
+            color: theme.textMuted,
             maxWidth: "340px",
             textWrap: "pretty",
           }}
@@ -186,16 +190,16 @@ export default function LinkTree() {
               gap: "13px",
               padding: "14px 22px",
               borderRadius: "999px",
-              background: "rgba(10,7,24,0.45)",
-              border: "1px solid rgba(8,190,216,0.30)",
+              background: alpha(theme.surface, 0.45),
+              border: `1px solid ${alpha(theme.accent, 0.3)}`,
               backdropFilter: "blur(6px)",
               WebkitBackdropFilter: "blur(6px)",
               textDecoration: "none",
-              color: "#F3F2F8",
+              color: theme.text,
             }}
           >
-            <span style={{ width: "20px", height: "20px", flex: "0 0 20px", color: "#6FE3F2" }}>
-              <Icon name={link.key} />
+            <span style={{ width: "20px", height: "20px", flex: "0 0 20px", color: theme.accentLight }}>
+              <Icon icon={link.icon} />
             </span>
             <span style={{ flex: 1, fontFamily: DISPLAY, fontWeight: 700, fontSize: "14.5px", textAlign: "left" }}>
               {link.label}
@@ -204,7 +208,7 @@ export default function LinkTree() {
               style={{
                 fontFamily: MONO,
                 fontSize: "10.5px",
-                color: "#9D93C8",
+                color: theme.textSubtle,
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
